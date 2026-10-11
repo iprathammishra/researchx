@@ -1,7 +1,5 @@
-# Source inbox
+# Source intake
 
-Drop research PDFs here, or add URLs to a `.txt` or `.md` file. Tell Codex what you want to understand and ask it to process this folder using the repository's AGENTS.md.
+Drop PDFs or a text file of URLs here and ask Codex to add them to researchx. Codex verifies each source in a dedicated research pass, finds the original public link, and adds a full title plus one short description to `content/`.
 
-This repository is public. Keep private or confidential sources local and untracked; attach them directly in your Codex conversation instead. Downloaded full sources belong in ignored `.work/` while researching. Only reviewed explanations and selected credited figures are published.
-
-The website's browser inbox is separate from this folder. Exported link manifests and downloaded PDFs can be placed here for Codex to read.
+This repository is public. Keep private material local and untracked. Full research downloads belong in ignored `.work/`; the site publishes only metadata and links. There is no browser upload service or generated detail-page workflow.

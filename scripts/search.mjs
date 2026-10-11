@@ -1,0 +1,1 @@
+export function matchesSearch(text,query){const normalize=s=>s.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');const haystack=normalize(text);return normalize(query).trim().split(/\s+/).filter(Boolean).every(word=>haystack.includes(word));}

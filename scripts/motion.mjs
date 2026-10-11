@@ -1,12 +1,13 @@
-// A scalar physical spring. Re-targeting preserves the presented value and velocity.
-export function springStep(state,target,elapsed,damping=1){
- let {position,velocity}=state;
- let remaining=Math.min(Math.max(elapsed,0),.05);
- while(remaining>0){const dt=Math.min(remaining,1/240);velocity+=(256*(target-position)-32*damping*velocity)*dt;position+=velocity*dt;remaining-=dt;}
- return {position,velocity};
+const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
+export function readingPresentation(distance,reduced=false){
+ if(reduced)return {scale:1,opacity:1,shift:0};
+ const proximity=clamp(1-Math.abs(distance)*1.55,0,1);
+ const eased=proximity*proximity*(3-2*proximity);
+ return {scale:.955+.045*eased,opacity:.35+.65*eased,shift:clamp(distance,-1,1)*-16||0};
 }
-export function projectedDetent(position,velocity){
- const rate=.995,projection=(velocity/1000)*rate/(1-rate);
- return Math.round(position+Math.max(-2,Math.min(2,projection)));
+export function pickFocus(distances,current=-1,hysteresis=.035){
+ if(!distances.length)return -1;
+ let nearest=0;for(let i=1;i<distances.length;i++)if(Math.abs(distances[i])<Math.abs(distances[nearest]))nearest=i;
+ if(current<0||current>=distances.length)return nearest;
+ return Math.abs(distances[nearest])+hysteresis<Math.abs(distances[current])?nearest:current;
 }
-export const wrapIndex=(index,count)=>((index%count)+count)%count;

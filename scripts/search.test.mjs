@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {matchesSearch} from './search.mjs';
+test('source search supports word order, case and accents',()=>{assert.equal(matchesSearch('CaMeL: Defeating Prompt Injections by Design','design prompt'),true);assert.equal(matchesSearch('Tramèr financial statements','tramer statements'),true);assert.equal(matchesSearch('AgentDojo','cash'),false);assert.equal(matchesSearch('AgentDojo','  '),true);});

@@ -1,22 +1,18 @@
 # researchx
 
-A personal reading room by Pratham Mishra. Research papers and articles become clear takeaways, credited source figures, and small interactive explanations.
+A quiet, animated reading collection by Pratham Mishra.
 
-**[Open researchx](https://iprathammishra.github.io/researchx/)** · **[Turn through the reading dial](https://iprathammishra.github.io/researchx/browse.html)**
+**[Open researchx](https://iprathammishra.github.io/researchx/)**
 
-Five initial sources: AgentDojo, CaMeL, normalization of deviance in AI, the lethal trifecta, and the SEC financial-statement guide. Each had a dedicated research subagent. Source versions, limits, short exact quotations, and figure credits sit beside the explanation.
+Scroll or swipe naturally; use arrow keys to move between articles. Click any full title to open its original paper or article in a new tab. Search and optional dry scroll ticks sit behind two small controls. No generated article pages, previews, counters, home sections, or browser inbox.
 
-## Add your next paper
+## Add a source
 
-Put PDFs or a text file of URLs in `inbox/`, then ask Codex:
-
-> Process pm/researchx/inbox/. Spawn a research subagent for each source, create sourced takeaways and an interactive visual explanation, then publish the checked site to GitHub Pages. Follow AGENTS.md.
-
-The website's **Add a source** page also stores links and PDFs locally in your browser. Export the JSON manifest and attach PDF files separately when asking Codex. Browser collection does not run AI or commit files to GitHub.
+Drop a PDF or a text file of URLs into `inbox/`, then ask Codex to verify its original title, author, canonical public source URL, and one concise description. Each source gets a dedicated research pass. Add its metadata to `content/`; the collection updates on build. For a local PDF, establish its original public link before adding it to this public site.
 
 ## Run locally
 
-Node 22+ and Python 3; no npm dependencies or installation required.
+Node 22+ and Python 3. No dependencies or installation required.
 
 ```sh
 npm test
@@ -25,19 +21,8 @@ npm run check
 npm run preview
 ```
 
-Open `http://localhost:8000`. Generated pages live in ignored `_site/`. The dial supports wheel, swipe, title selection, arrow keys, Home/End, and explicit previous/next buttons. Reduced-motion settings suppress animation.
+Open `http://localhost:8000`. Generated files are in ignored `_site/`. `browse.html` is an alias of the same collection for existing preview links. Only this one experience is published.
 
-## Structure
+The default sound is an original 22 ms dry noise tick, synthesized locally. Sound is optional, requires browser activation, and stays muted when disabled. Only scroll-driven article focus changes make sound; hover, search and links stay silent. Scroll position continuously controls gentle scale and opacity changes. Native scrolling preserves platform momentum and remains interruptible; keyboard navigation centres each source smoothly. Reduced-motion settings disable transforms and animated scrolling.
 
-- `content/*.json`: sourced explanations and interaction data.
-- `assets/sources/`: selected original figures; see [SOURCES.md](SOURCES.md).
-- `app.js`, `style.css`: reading experience and browser-local source inbox.
-- `scripts/build.mjs`: escapes content and generates static pages.
-- `scripts/models.mjs`: inspectable logic behind teaching examples.
-- `.github/workflows/pages.yml`: checks and publishes `master` to GitHub Pages.
-
-All links and assets use paths compatible with `/researchx/`. Save/read markers use localStorage; PDFs and source metadata use IndexedDB. No backend, credentials, analytics, external fonts, or runtime dependencies.
-
-The Git remote stays `https://github.com/iprathammishra/researchx.git`; the local branch is `master`. Commit identity is Pratham Mishra / mishrapratham.codeit@gmail.com.
-
-The reading dial also has optional, locally synthesized tactile ticks. Sound starts only after enabling the visible control and a browser-authorized gesture. It can be muted at any time; no audio files or reference-site sound assets are downloaded.
+GitHub Actions checks and publishes `master`. Local commit identity: Pratham Mishra / mishrapratham.codeit@gmail.com. Origin: `https://github.com/iprathammishra/researchx.git`.

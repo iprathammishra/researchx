@@ -1,24 +1,33 @@
 [
   {
-    "effect_id": "momentum-picker",
+    "effect_id": "depth-stack",
     "upstream_commit": "017498f8ae0e728ce7461852070d22601dd0a46e",
     "project": "researchx",
-    "framework": "Vanilla JavaScript and CSS",
-    "implementation_paths": ["app.js", "style.css", "scripts/motion.mjs"],
-    "status": "implemented",
-    "checks": ["Scalar spring interruption and settling model tests pass", "Circular indexing and momentum projection tests pass", "All static content and local links pass validation"],
-    "limitations": ["Final gesture and narrow-layout browser pass pending"],
-    "notes": "Independent behavioral adaptation of the recipe, using a physical spring rather than the upstream CSS approximation and wheel lock. Pointer tracking, velocity handoff and reduced-motion handling follow Apple Design. Upstream records remain extracted."
-  },
-  {
-    "effect_id": "bookmark-toggle",
-    "upstream_commit": "017498f8ae0e728ce7461852070d22601dd0a46e",
-    "project": "researchx",
-    "framework": "Vanilla JavaScript and CSS",
-    "implementation_paths": ["app.js", "style.css"],
-    "status": "implemented",
-    "checks": ["Real saved state drives aria-pressed and ribbon fill", "Reduced-motion CSS disables the decorative drop"],
-    "limitations": ["Final save/reversal browser pass pending"],
-    "notes": "Original ribbon geometry and implementation. Adapted behavioral concept; smaller displacement for an editorial reading room."
+    "project_revision": "Reading collection redesign, 2026-10-11",
+    "framework": "Vanilla JavaScript and CSS; native browser scrolling",
+    "implementation_paths": [
+      "app.js",
+      "style.css",
+      "scripts/motion.mjs"
+    ],
+    "status": "verified",
+    "verification_scope": "Local Firefox desktop and responsive 390 \u00d7 844 viewport; Node 22 logic checks. Upstream recipe remains extracted.",
+    "checks": [
+      "Bounded, continuous and symmetric scroll presentation; focus hysteresis and reduced-motion model tests pass",
+      "Firefox desktop: repeated arrow navigation changes article focus; scrolling produces intermediate transform states",
+      "100-frame native smooth-scroll sample in Firefox: 59 distinct scroll positions; 95th percentile frame interval 9 ms on this machine",
+      "Full original titles and descriptions visually inspected at desktop and phone width",
+      "Firefox search: financial query yields the SEC source; empty results recover; original link opens SEC in a new tab",
+      "Firefox reduced-motion emulation: all five transforms are none, opacity is 1, scroll behavior is auto",
+      "Optional sound activates from stored preference without toggling off; mute state tests pass",
+      "Build and content checks confirm five direct original links and no generated detail pages or dial"
+    ],
+    "limitations": [
+      "Frame timing is a small local sample, not a performance guarantee across devices",
+      "Phone layout was checked in responsive emulation, not on physical mobile hardware",
+      "Native wheel input could not be driven by the computer-use scroll tool; native smooth scrolling and keyboard navigation were verified",
+      "The existing original dry tick was preserved; subjective listening review is not claimed"
+    ],
+    "notes": "Independent adaptation of restrained scale/translation depth cues. Continuous viewport proximity replaces hover fan-out and overlapping cards. Native wheel/touch scrolling is not intercepted; a single requestAnimationFrame batches geometry reads before compositor-friendly writes. No wheel locks, dial, idle loop, or extra motion dependency."
   }
 ]

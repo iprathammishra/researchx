@@ -1,78 +1,15 @@
 {
   "id": "statements",
-  "title": "Profit is not the same as cash",
   "originalTitle": "Beginners' Guide to Financial Statement",
-  "deck": "Connect earnings, cash movement, and the balance sheet with a small worked example.",
+  "deck": "A plain-language guide to balance sheets, income statements, cash flows, and shareholders’ equity.",
   "authors": "U.S. Securities and Exchange Commission · Office of Investor Education and Advocacy",
   "published": "2007-02-04",
-  "type": "Guide",
-  "topic": "Finance",
-  "minutes": 3,
   "source": "https://www.sec.gov/about/reports-publications/investorpubsbegfinstmtguide",
   "sourceLabel": "SEC",
-  "takeaways": [
+  "topic": "Finance",
+  "searchTerms": [
     "Read the financial statements together.",
     "Profit and cash generation answer different questions.",
     "Footnotes explain choices behind the reported numbers."
-  ],
-  "sections": [
-    {
-      "heading": "A snapshot and two flows",
-      "paragraphs": [
-        "A balance sheet records assets, obligations, and owners’ interest at one date. Income measures earnings over a period; cash flow tracks cash movements.",
-        "The fourth statement tracks changes in owners’ equity."
-      ]
-    },
-    {
-      "heading": "Cash has three routes",
-      "paragraphs": [
-        "The guide separates operating cash from investment purchases or sales and financing such as borrowing, repayments, and share issuance."
-      ]
-    },
-    {
-      "heading": "Read beyond the headline",
-      "paragraphs": [
-        "Footnotes explain accounting policies and other details. Management’s discussion supplies context, trends, and risks. Useful ratios depend on the industry."
-      ]
-    },
-    {
-      "heading": "Original example · a hypothetical business",
-      "paragraphs": [
-        "This researchx example is authored for learning; it is not from the SEC guide. Begin with $50 cash funded entirely by the owner. Earn $100 revenue, collect $80, and incur $60 expenses paid in cash. There are no other transactions.",
-        "Profit is $40, but operating cash flow is $20. Cash closes at $70, and customers still owe $20. Closing assets of $90 equal equity of $90: the initial $50 plus $40 retained profit. This is an educational illustration, not an investment recommendation."
-      ]
-    }
-  ],
-  "quote": {
-    "text": "No one financial statement tells the complete story.",
-    "locator": "Bringing It All Together, final paragraph"
-  },
-  "caveats": [
-    {
-      "heading": "Introductory scope",
-      "text": "This 2007 guide introduces financial statements; it does not provide company-specific analysis."
-    },
-    {
-      "heading": "A simplified model",
-      "text": "The original example assumes no debt, taxes, investing, financing, depreciation, dividends, or other opening assets and liabilities."
-    }
-  ],
-  "references": [
-    {
-      "label": "Read the SEC guide",
-      "url": "https://www.sec.gov/about/reports-publications/investorpubsbegfinstmtguide",
-      "locator": "Published 4 February 2007; last reviewed 5 February 2007"
-    },
-    {
-      "label": "How cash connects to earnings",
-      "url": "https://www.sec.gov/about/reports-publications/investorpubsbegfinstmtguide",
-      "locator": "Cash Flow Statements and Bringing It All Together"
-    }
-  ],
-  "interaction": {
-    "kind": "statements",
-    "title": "Follow one sale through the statements",
-    "description": "Adjust cash collected from $10 to $100 against a fictional business’s $100 revenue. Keep expenses at $60, paid in cash, and opening cash at $50. Compare profit, operating cash, receivables, and the linked balance sheet.",
-    "boundary": "Original researchx educational model. No debt, taxes, other flows, or opening receivables. The business retains its profit. This is not an investment recommendation."
-  }
+  ]
 }

@@ -1,15 +1,9 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import {springStep,projectedDetent,wrapIndex} from './motion.mjs';
-test('spring settles after reversing in motion without a discontinuous position',()=>{
- let s={position:0,velocity:0};
- for(let i=0;i<12;i++)s=springStep(s,1,1/60);
- const before=s.position;s=springStep(s,-1,1/60);
- assert.ok(Math.abs(s.position-before)<.2);
- for(let i=0;i<180;i++)s=springStep(s,-1,1/60);
- assert.ok(Math.abs(s.position+1)<.001);assert.ok(Math.abs(s.velocity)<.001);
+import test from 'node:test';import assert from 'node:assert/strict';import {readingPresentation,pickFocus} from './motion.mjs';
+test('reading focus is continuous, bounded, symmetric and respects reduced motion',()=>{
+ assert.deepEqual(readingPresentation(0),{scale:1,opacity:1,shift:0});
+ for(let p=-2;p<=2;p+=.025){const m=readingPresentation(p);assert.ok(m.opacity>=.35&&m.opacity<=1);assert.ok(m.scale>=.955&&m.scale<=1);assert.ok(Math.abs(m.opacity-readingPresentation(-p).opacity)<1e-9);assert.ok(Math.abs(m.opacity-readingPresentation(p+.001).opacity)<.003);}
+ assert.deepEqual(readingPresentation(.75,true),{scale:1,opacity:1,shift:0});
 });
-test('momentum projects with direction and circular selection wraps both ways',()=>{
- assert.ok(projectedDetent(0,6)>0);assert.ok(projectedDetent(0,-6)<0);
- assert.equal(wrapIndex(-1,5),4);assert.equal(wrapIndex(5,5),0);
+test('focus hysteresis prevents ticks from chattering between adjacent articles',()=>{
+ assert.equal(pickFocus([.31,-.29],0),0);assert.equal(pickFocus([.34,-.26],0),1);assert.equal(pickFocus([.29,-.31],1),1);assert.equal(pickFocus([.25,-.35],1),0);assert.equal(pickFocus([],0),-1);assert.equal(pickFocus([.4,-.1],-1),1);
 });

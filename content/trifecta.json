@@ -1,99 +1,15 @@
 {
   "id": "trifecta",
-  "title": "Three capabilities, one dangerous combination",
   "originalTitle": "The lethal trifecta for AI agents: private data, untrusted content, and external communication",
   "deck": "An agent’s tool permissions can connect an attacker’s instructions to your private information.",
   "authors": "Simon Willison",
   "published": "2025-06-16",
-  "type": "Essay",
-  "topic": "Agent security",
-  "minutes": 3,
   "source": "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
   "sourceLabel": "Simon Willison’s Weblog",
-  "takeaways": [
+  "topic": "Agent security",
+  "searchTerms": [
     "Private information, attacker-controlled input and an outbound channel create a data-theft path together.",
     "Instructions embedded in retrieved material can redirect an agent.",
     "Review combined tool permissions, not just individual tools."
-  ],
-  "sections": [
-    {
-      "heading": "How the path forms",
-      "paragraphs": [
-        "A malicious document can ask an assistant to retrieve confidential information and transmit it. The tools supply the capabilities; injected instructions connect them."
-      ]
-    },
-    {
-      "heading": "Outbound channels hide in ordinary features",
-      "paragraphs": [
-        "Email is only one route. Network requests, image loads and public repository activity can also carry information outward."
-      ]
-    },
-    {
-      "heading": "Inspect the combination",
-      "paragraphs": [
-        "Willison warns that mixing tools can recreate vulnerabilities vendors previously closed. He questions detection promises because probabilistic protection leaves failures possible."
-      ]
-    }
-  ],
-  "quote": {
-    "text": "LLMs follow instructions in content.",
-    "locator": "Section “The problem is that LLMs follow instructions in content”, opening sentence"
-  },
-  "figure": {
-    "path": "assets/sources/trifecta.png",
-    "caption": "Original essay diagram. Credit: Simon Willison. PNG conversion of the published JPEG.",
-    "sourceUrl": "https://static.simonwillison.net/static/2025/lethaltrifecta.jpg",
-    "alt": "Three colored ovals identify confidential-data access, outward communication and untrusted input."
-  },
-  "caveats": [
-    {
-      "heading": "A security argument",
-      "text": "This essay provides no measured attack probability."
-    },
-    {
-      "heading": "One threat model",
-      "text": "Breaking this conjunction does not establish overall system safety."
-    }
-  ],
-  "references": [
-    {
-      "label": "Read the original essay",
-      "url": "https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/",
-      "locator": "Published 16 June 2025; three-capability list and sections on tool mixing and guardrails"
-    },
-    {
-      "label": "Original diagram",
-      "url": "https://static.simonwillison.net/static/2025/lethaltrifecta.jpg",
-      "locator": "Illustration immediately below the three-capability list"
-    }
-  ],
-  "interaction": {
-    "type": "trifecta",
-    "title": "Build or break the path",
-    "label": "Original teaching example · authored by researchx",
-    "description": "Imagine a fictional travel assistant. Switch its capabilities on and off to inspect one possible information-flow path. This is a conceptual model, not a risk score.",
-    "toggles": [
-      {
-        "id": "privateData",
-        "label": "Private data",
-        "example": "Can read your private itinerary",
-        "default": true
-      },
-      {
-        "id": "untrustedContent",
-        "label": "Untrusted content",
-        "example": "Reads a hotel page an attacker can edit",
-        "default": true
-      },
-      {
-        "id": "externalCommunication",
-        "label": "External communication",
-        "example": "Can submit information to an arbitrary website",
-        "default": true
-      }
-    ],
-    "activeMessage": "The depicted route is open: malicious page instructions could connect the itinerary to an outbound submission.",
-    "inactiveMessage": "The depicted conjunction is broken. Other attack paths and ordinary mistakes can still exist.",
-    "logic": "privateData && untrustedContent && externalCommunication"
-  }
+  ]
 }

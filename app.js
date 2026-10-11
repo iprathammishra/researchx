@@ -1,108 +1,52 @@
-import {trifecta,permission,statements} from './models.mjs';
-import {springStep,projectedDetent,wrapIndex} from './motion.mjs';
-const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
-const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let memory = {};
-function read(key,fallback){try{return JSON.parse(localStorage.getItem('researchx-'+key))??fallback}catch{return memory[key]??fallback}}
-function write(key,value){memory[key]=value;try{localStorage.setItem('researchx-'+key,JSON.stringify(value));return true}catch{return false}}
-let saved = read('saved',[]), readIds = read('read',[]);
-function toast(message){$('.toast')?.remove();const n=document.createElement('div');n.className='toast';n.setAttribute('role','status');n.textContent=message;document.body.append(n);setTimeout(()=>n.remove(),3500)}
-function updateSaved(){
- $$('[data-save]').forEach(b=>{const on=saved.includes(b.dataset.save);b.setAttribute('aria-pressed',String(on));b.innerHTML=`<svg aria-hidden="true" viewBox="0 0 18 22"><path d="M3 2h12v18l-6-4-6 4z"/></svg><span>${on?'Saved':document.body.dataset.article?'Save for later':'Save'}</span>`;});
- if($('#saved-count'))$('#saved-count').textContent=saved.length;
+import {sound,initSound} from './audio.js';
+import {readingPresentation,pickFocus} from './motion.mjs';
+import {matchesSearch} from './search.mjs';
+initSound();
+const $=selector=>document.querySelector(selector);
+const reader=$('.reading-stack'),entries=[...document.querySelectorAll('.reading-entry')],panel=$('#search-panel'),input=$('#article-search');
+const reduced=matchMedia('(prefers-reduced-motion:reduce)');
+let visible=entries,active=null,frame=0,audibleUntil=0,keyboardMode=false,navigationTarget=null;
+function paint(){
+ frame=0;if(document.hidden||!visible.length)return;
+ const bounds=reader.getBoundingClientRect(),height=bounds.height,centre=bounds.top+height/2;
+ const distances=visible.map(entry=>{const r=entry.getBoundingClientRect();return (r.top+r.height/2-centre)/height;});
+ const next=visible[pickFocus(distances,visible.indexOf(active))];
+ visible.forEach((entry,i)=>{const motion=readingPresentation(distances[i],reduced.matches),inner=entry.firstElementChild;inner.style.transform=`translateY(${motion.shift}px) scale(${motion.scale})`;inner.style.opacity=motion.opacity;entry.classList.toggle('is-active',entry===next);const link=entry.querySelector('a');if(entry===next)link.setAttribute('aria-current','true');else link.removeAttribute('aria-current');});
+ if(active&&next!==active&&performance.now()<audibleUntil)sound.play('tick');active=next;
 }
-$$('[data-save]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.save;saved=saved.includes(id)?saved.filter(x=>x!==id):[...saved,id];const persisted=write('saved',saved);updateSaved();filterLibrary();if(!persisted)toast('Saved for this visit. Browser storage is unavailable.');}));
-updateSaved();
-let filter='all';
-function filterLibrary(){if(!$('#library-list'))return;const q=$('#library-search').value.toLowerCase().trim();let count=0;$$('.library-row').forEach(r=>{const visible=(!q||r.dataset.search.includes(q))&&(filter==='all'||(filter==='saved'?saved.includes(r.dataset.id):r.dataset.topic===filter));r.hidden=!visible;if(visible)count++;});$('#empty-library').hidden=count>0;$('#result-count').textContent=`${count} source${count===1?'':'s'}`;}
-$('#library-search')?.addEventListener('input',filterLibrary);
-$$('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;$$('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));filterLibrary();}));
-const articleId=document.body.dataset.article;
-if(articleId){
- const mark=$('#mark-read');const update=()=>{const on=readIds.includes(articleId);mark.setAttribute('aria-pressed',String(on));mark.textContent=on?'Read ✓':'Mark as read';};update();mark.addEventListener('click',()=>{readIds=readIds.includes(articleId)?readIds.filter(x=>x!==articleId):[...readIds,articleId];if(!write('read',readIds))toast('Read marker saved for this visit only.');update();});
- $('#print-article').addEventListener('click',()=>window.print());
- const progress=()=>{$('#reading-progress').style.width=`${Math.min(100,Math.max(0,100*window.scrollY/(document.documentElement.scrollHeight-window.innerHeight||1)))}%`;};addEventListener('scroll',progress,{passive:true});progress();
- const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){$$('.contents a').forEach(a=>{if(a.hash==='#'+entry.target.id)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});}},{rootMargin:'-10% 0px -65% 0px'});$$('.article-body>section').forEach(s=>observer.observe(s));
- fetch('articles.json').then(r=>{if(!r.ok)throw Error('fetch');return r.json()}).then(list=>{const a=list.find(x=>x.id===articleId);if(!a)throw Error('article');renderInteractive(a)}).catch(()=>{$('#interactive').innerHTML='<p>The interactive could not load. Reload the page, or continue with the summary and source figure below.</p>';});
-}
-function renderInteractive(a){
- const box=$('#interactive');
- if(a.id==='paper-2406'){
-  const rows=a.interaction.data;
-  const metrics=[['benignUtility','Tasks completed without attack','↑ Higher is better'],['utilityUnderAttack','Useful work under attack','↑ Higher is better'],['targetedASR','Attacker goal achieved','↓ Lower is better']];
-  box.innerHTML=`<p class="chart-note">Measured results · GPT-4o · AgentDojo Table 5, v3</p><label for="defense">Compare a defense</label><br><select id="defense">${rows.map((r,i)=>`<option value="${i}">${esc(r.label)}</option>`).join('')}</select><div id="defense-chart" aria-live="polite"></div><p class="chart-note">Error ranges are reported 95% confidence intervals (± percentage points). Separate experiments may use different attacks and baselines.</p><details><summary>Show every reported value</summary><div class="table-scroll"><table class="metric-table"><caption class="sr-only">AgentDojo Table 5 defense comparison, percentages</caption><thead><tr><th scope="col">Defense</th><th scope="col">Benign utility</th><th scope="col">Utility under attack</th><th scope="col">Attack success</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${esc(r.label)}</th>${metrics.map(([key])=>`<td>${r[key].toFixed(2)} ± ${r.ci95[key].toFixed(1)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
-  const update=()=>{const r=rows[Number($('#defense').value)];$('#defense-chart').innerHTML=metrics.map(([key,label,direction])=>`<div class="chart-label"><label>${label}</label><span>${r[key].toFixed(2)}% ± ${r.ci95[key].toFixed(1)}</span></div><div class="chart-track" aria-hidden="true"><div class="chart-bar ${key==='targetedASR'?'attack':''}" style="width:${r[key]}%"></div></div><span class="fine">${direction}</span>`).join('')+'<div class="chart-scale" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>';};$('#defense').addEventListener('change',update);update();
- }else if(a.id==='paper-2503'){
-  box.innerHTML='<p class="chart-note">An original teaching example · one allow-list rule</p><label for="recipient">Send the private file to</label><br><select id="recipient"><option>Bob</option><option>Mallory</option></select><label class="switch-label"><input id="gate" type="checkbox" checked> Enforce the file’s allowed readers</label><div class="demo-flow"><div class="demo-node">Private file<small>Readers: Alice, Bob</small></div><span class="demo-arrow" aria-hidden="true">→</span><div class="demo-node" id="gate-node">Permission check<small>Runs outside the model</small></div><span class="demo-arrow" id="route-arrow" aria-hidden="true">→</span><div class="demo-node" id="recipient-node">Bob<small>Requested recipient</small></div></div><div id="permission-result" class="demo-status" role="status"></div>';
-  const update=()=>{const recipient=$('#recipient').value,gate=$('#gate').checked,status=permission(recipient,gate);$('#recipient-node').innerHTML=esc(recipient)+'<small>Requested recipient</small>';$('#gate-node').innerHTML=(gate?'Permission check':'Check bypassed')+'<small>'+(gate?'Runs outside the model':'No rule is enforced')+'</small>';$('#route-arrow').textContent=status==='blocked'?'×':'→';const result=$('#permission-result');result.classList.toggle('danger',status!=='allowed');result.innerHTML=status==='allowed'?'<strong>Allowed by this rule.</strong>Bob is on the file’s allowed-reader list.':status==='blocked'?'<strong>Blocked before sending.</strong>Mallory is not on the file’s allowed-reader list. A plausible instruction cannot grant permission.':'<strong>Uncontrolled by this rule.</strong>The gate is off. This example no longer checks whether the recipient may read the file.';};$('#recipient').addEventListener('change',update);$('#gate').addEventListener('change',update);update();
- }else if(a.id==='trifecta'){
-  const options=a.interaction.toggles;
-  box.innerHTML=`<p class="chart-note">An original teaching model · toggle the capabilities</p><div class="trifecta-toggles">${options.map(t=>`<label class="switch-label"><input id="${esc(t.id)}" type="checkbox" checked><span>${esc(t.label)}<small>${esc(t.example)}</small></span></label>`).join('')}</div><div class="condition-map" aria-hidden="true"><span data-condition="privateData">Private<br>data</span><b>+</b><span data-condition="untrustedContent">Untrusted<br>content</span><b>+</b><span data-condition="externalCommunication">External<br>communication</span></div><div id="trifecta-result" class="demo-status" role="status"></div>`;
-  const update=()=>{const c=Object.fromEntries(options.map(t=>[t.id,$('#'+t.id).checked]));const active=trifecta(c);$$('[data-condition]').forEach(n=>n.classList.toggle('off',!c[n.dataset.condition]));$('#trifecta-result').classList.toggle('danger',active);$('#trifecta-result').innerHTML=active?'<strong>The depicted conjunction is present.</strong>Untrusted content can influence an assistant that has private data and a route to send it outside.':'<strong>This depicted conjunction is broken.</strong>At least one condition is absent. Other prompt-injection risks can remain; this is not a general safety guarantee.';};options.forEach(t=>$('#'+t.id).addEventListener('change',update));update();
- }else if(a.id==='normalization'){
-  const steps=a.interaction.steps;
-  const initial=steps[0].safeguards;
-  box.innerHTML=`<p class="chart-note">A fictional rollout · no measured failure rates</p><div class="step-buttons" role="group" aria-label="Select deployment stage">${steps.map((s,i)=>`<button data-step="${i}" aria-pressed="${i===0}">${i+1}. ${esc(s.label)}</button>`).join('')}</div><div id="drift-result" aria-live="polite"></div>`;
-  const update=i=>{$$('[data-step]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.step)===i)));const s=steps[i];$('#drift-result').innerHTML=`<div class="safeguards">${initial.map(control=>`<span class="${s.safeguards.includes(control)?'':'removed'}">${esc(control)}</span>`).join('')}</div><p class="demo-output">${esc(s.change)}</p><div class="demo-status ${i?'danger':''}"><strong>${s.safeguards.length} of ${initial.length} original safeguards remain.</strong>${i?'The quiet pilot did not test the consequences of the newly granted access.':'The assistant suggests an action; the workflow constrains execution.'}</div>`;};$$('[data-step]').forEach(b=>b.addEventListener('click',()=>update(Number(b.dataset.step))));update(0);
- }else if(a.id==='statements'){
-  box.innerHTML='<p class="chart-note">An original example · all amounts in dollars</p><p class="demo-output">You earn $100 in revenue and pay $60 in expenses. Opening cash is $50. How much of that revenue arrives in cash?</p><label class="statement-control" for="collected"><span>Cash collected from customers <output id="collected-value" for="collected">$80</output></span><input id="collected" type="range" min="10" max="100" step="1" value="80"><span class="fine"><span>$10</span><span>$100</span></span></label><div id="statement-results" aria-live="polite"></div><p class="chart-note">Revenue is earned on credit; all expenses are paid. No taxes, debt, opening receivables, or investing and financing flows. The $10 minimum keeps closing cash nonnegative.</p>';
-  const update=()=>{const c=Number($('#collected').value),m=statements(100,c,60);$('#collected-value').textContent='$'+c;$('#statement-results').innerHTML=`<div class="statement-grid"><div><small>Income statement</small><strong>$${m.profit}</strong><span>Profit = 100 − 60</span></div><div><small>Cash flow statement</small><strong>${m.cashFlow<0?'−$'+Math.abs(m.cashFlow):'$'+m.cashFlow}</strong><span>Operating cash = ${c} − 60</span></div><div><small>Balance sheet</small><strong>$${m.receivables}</strong><span>Still owed = 100 − ${c}</span></div></div><div class="balance-strip"><span>Cash $${m.closingCash} + receivables $${m.receivables}<br><strong>Assets $${m.assets}</strong></span><span>Opening equity $50 + profit $${m.profit}<br><strong>Equity $${m.equity} · balanced ✓</strong></span></div>`;};$('#collected').addEventListener('input',update);update();
- }
-}
-if($('#source-form'))initInbox();
-if($('.browse-stage'))initDial();
-async function initDial(){
- let articles;try{const r=await fetch('articles.json');if(!r.ok)throw Error('load');articles=await r.json();}catch{toast('The dial could not load. Use the library list.');return;}
- const buttons=$$('[data-dial]'),dial=$('.article-dial'),stage=$('.browse-stage');
- const reduced=matchMedia('(prefers-reduced-motion:reduce)');
- let state={position:0,velocity:0},target=0,selected=-1,frame=0,lastFrame=0,settleTimer=0,drag=null,suppressClickUntil=0,damping=1;
- let wheelAnchor=0,wheelDirection=0,soundEnabled=read('sound',false),audioContext=null,lastTick=-1,noiseBuffer=null;
- const soundButton=$('#sound-toggle');
- const soundLabel=()=>{soundButton.setAttribute('aria-pressed',String(soundEnabled));soundButton.textContent=soundEnabled?'Sound on':'Sound off';};soundLabel();
- const armSound=async()=>{if(!soundEnabled)return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('Audio unavailable');if(!audioContext){audioContext=new Audio();noiseBuffer=audioContext.createBuffer(1,Math.ceil(audioContext.sampleRate*.022),audioContext.sampleRate);const samples=noiseBuffer.getChannelData(0);for(let i=0;i<samples.length;i++)samples[i]=(Math.random()*2-1)*Math.exp(-i/audioContext.sampleRate*230);}if(audioContext.state==='suspended')await audioContext.resume();}catch{soundEnabled=false;soundLabel();toast('Sound is unavailable in this browser.');}};
- const tick=()=>{if(!soundEnabled||!audioContext||audioContext.state!=='running'||document.hidden)return;const time=audioContext.currentTime;if(time-lastTick<.055)return;lastTick=time;const source=audioContext.createBufferSource(),filter=audioContext.createBiquadFilter(),gain=audioContext.createGain();source.buffer=noiseBuffer;filter.type='bandpass';filter.frequency.value=1700;filter.Q.value=.7;gain.gain.setValueAtTime(.085,time);gain.gain.exponentialRampToValueAtTime(.001,time+.025);source.connect(filter).connect(gain).connect(audioContext.destination);source.start(time);source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};};
- soundButton.addEventListener('click',async()=>{soundEnabled=!soundEnabled;write('sound',soundEnabled);soundLabel();if(soundEnabled){await armSound();tick();}else audioContext?.suspend();});
- stage.addEventListener('pointerdown',()=>{if(soundEnabled)armSound();},{capture:true});
- let radius=370,spacing=120;
- const geometry=()=>{const small=matchMedia('(max-width:720px)').matches;radius=small?200:370;spacing=radius*Math.sin(19*Math.PI/180);};geometry();
- const updatePreview=index=>{const a=articles[index];if(selected!==-1)tick();selected=index;buttons.forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
-  const content=$('#browse-preview-content');content.innerHTML=`<p class="eyebrow">${esc(a.type)} / ${esc(a.topic)} / ${a.minutes} MIN READ</p><h1>${esc(a.title)}</h1><p>${esc(a.deck)}</p><a class="button primary" href="${esc(a.id)}.html">Read this idea <span>↗</span></a>`;
-  const art=$('#browse-art');art.innerHTML=a.figure?`<img src="${esc(a.figure.path)}" alt="${esc(a.figure.alt)}"><span>From the original · ${esc(a.sourceLabel)}</span>`:'<div class="money-preview"><span>PROFIT</span><strong>$40</strong><i>≠</i><span>OPERATING CASH</span><strong>$20</strong></div><span>Original researchx teaching example</span>';
-  $('#browse-position').textContent=`${String(index+1).padStart(2,'0')} / ${String(articles.length).padStart(2,'0')} · ${a.title}`;$('#browse-source').textContent=a.sourceLabel;
- };
- const paint=()=>{buttons.forEach((b,i)=>{let offset=wrapIndex(i-state.position+articles.length/2,articles.length)-articles.length/2;const angle=offset*19,rad=angle*Math.PI/180;const fade=Math.abs(offset)>2?Math.max(0,(2.5-Math.abs(offset))*1.3):Math.abs(offset)>1?.65:.8;b.style.transform=`translate(${radius*(1-Math.cos(rad))}px, ${radius*Math.sin(rad)}px) rotate(${angle}deg)`;b.style.opacity=Math.abs(offset)<.15?1:fade;});$('#dial-spokes').style.transform=`rotate(${state.position*38}deg)`;const current=wrapIndex(Math.round(state.position),articles.length);if(current!==selected)updatePreview(current);};
- const animate=time=>{frame=0;if(document.hidden)return;const elapsed=lastFrame?(time-lastFrame)/1000:1/60;lastFrame=time;state=springStep(state,target,elapsed,damping);paint();if(Math.abs(target-state.position)>.001||Math.abs(state.velocity)>.01)frame=requestAnimationFrame(animate);else{state={position:target,velocity:0};paint();lastFrame=0;dial.classList.remove('moving');}};
- const go=next=>{target=next;if(reduced.matches){cancelAnimationFrame(frame);frame=0;state={position:target,velocity:0};paint();}else if(!frame&&!document.hidden){lastFrame=0;dial.classList.add('moving');frame=requestAnimationFrame(animate);}};
- const choose=index=>{clearTimeout(settleTimer);settleTimer=0;damping=1;let distance=wrapIndex(index-state.position+articles.length/2,articles.length)-articles.length/2;go(state.position+distance);};
- paint();
- buttons.forEach((b,i)=>b.addEventListener('click',ev=>{if(performance.now()<suppressClickUntil){ev.preventDefault();return;}choose(i);}));
- $('#dial-prev').addEventListener('click',()=>{clearTimeout(settleTimer);settleTimer=0;damping=1;go(Math.round(target)-1);});$('#dial-next').addEventListener('click',()=>{clearTimeout(settleTimer);settleTimer=0;damping=1;go(Math.round(target)+1);});
- stage.addEventListener('wheel',ev=>{if(ev.ctrlKey||Math.abs(ev.deltaX)>Math.abs(ev.deltaY)||drag)return;if(matchMedia('(max-width:720px)').matches&&!ev.target.closest('.article-dial'))return;ev.preventDefault();damping=1;const delta=ev.deltaY*(ev.deltaMode===1?16:ev.deltaMode===2?240:1);if(!settleTimer)wheelAnchor=Math.round(target);wheelDirection=Math.sign(delta);go(target+Math.max(-1,Math.min(1,delta/300)));clearTimeout(settleTimer);settleTimer=setTimeout(()=>{const moved=target-wheelAnchor;let landing=Math.round(target);if(Math.abs(moved)>.08&&Math.abs(moved)<.5)landing=wheelAnchor+wheelDirection;settleTimer=0;go(landing);},110);},{passive:false});
- stage.addEventListener('keydown',ev=>{if(ev.target.closest('input,textarea,select'))return;if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End'].includes(ev.key)){ev.preventDefault();clearTimeout(settleTimer);settleTimer=0;damping=1;if(ev.key==='Home')choose(0);else if(ev.key==='End')choose(articles.length-1);else go(Math.round(target)+(['ArrowDown','PageDown'].includes(ev.key)?1:-1));}});
- dial.addEventListener('pointerdown',ev=>{if(ev.button!==0||ev.target.closest('.dial-controls'))return;clearTimeout(settleTimer);cancelAnimationFrame(frame);frame=0;drag={id:ev.pointerId,y:ev.clientY,position:state.position,moving:false,history:[{position:state.position,time:ev.timeStamp}]};target=state.position;state.velocity=0;});
- dial.addEventListener('pointermove',ev=>{if(!drag||ev.pointerId!==drag.id)return;if(!drag.moving&&Math.abs(ev.clientY-drag.y)<7)return;if(!drag.moving){drag.moving=true;dial.setPointerCapture(ev.pointerId);dial.classList.add('moving');}state.position=drag.position+(drag.y-ev.clientY)/spacing;const history=drag.history;history.push({position:state.position,time:ev.timeStamp});while(history.length>2&&ev.timeStamp-history[0].time>80)history.shift();const first=history[0];state.velocity=(state.position-first.position)/Math.max(.016,(ev.timeStamp-first.time)/1000);target=state.position;paint();});
- const release=(ev,cancel=false)=>{if(!drag||ev.pointerId!==drag.id)return;const moved=drag.moving;drag=null;if(dial.hasPointerCapture(ev.pointerId))dial.releasePointerCapture(ev.pointerId);if(moved){suppressClickUntil=performance.now()+100;damping=cancel?1:.8;go(cancel?Math.round(state.position):projectedDetent(state.position,state.velocity));}else{damping=1;go(Math.round(state.position));}};
- dial.addEventListener('pointerup',ev=>release(ev));dial.addEventListener('pointercancel',ev=>release(ev,true));
- addEventListener('resize',()=>{geometry();paint();});
- reduced.addEventListener('change',()=>go(Math.round(target)));
- document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;clearTimeout(settleTimer);settleTimer=0;audioContext?.suspend();}else go(Math.round(target));});
- addEventListener('pagehide',()=>{cancelAnimationFrame(frame);clearTimeout(settleTimer);audioContext?.close();},{once:true});
-}
-async function initInbox(){
- let db;
- const status=message=>$('#inbox-status').textContent=message;
- const buttons=[$('#source-form button'),$('#source-file'),$('#export-inbox')];buttons.forEach(b=>b.disabled=true);
- try{db=await new Promise((resolve,reject)=>{const r=indexedDB.open('researchx-inbox',1);r.onupgradeneeded=()=>r.result.createObjectStore('sources',{keyPath:'id'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.onblocked=()=>reject(Error('blocked'));});}catch{status('Browser storage is unavailable. Put files in the repository’s inbox/ folder instead.');return;}
- const transaction=(mode,fn)=>new Promise((resolve,reject)=>{const tx=db.transaction('sources',mode);let result;const req=fn(tx.objectStore('sources'));if(req)req.onsuccess=()=>result=req.result;tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});
- const all=()=>transaction('readonly',s=>s.getAll());
- const refresh=async()=>{const rows=(await all()).sort((a,b)=>b.created-a.created);$('#queue-count').textContent=rows.length;$('#empty-inbox').hidden=rows.length>0;$('#export-inbox').disabled=rows.length===0;$('#source-queue').innerHTML=rows.map(r=>`<li><h3>${r.kind==='pdf'?'PDF · ':''}${esc(r.kind==='pdf'?r.name:new URL(r.url).hostname)}</h3>${r.url?`<p><a href="${esc(r.url)}">${esc(r.url)}</a></p>`:`<p>${(r.size/1048576).toFixed(1)} MB · Stored in this browser</p>`}${r.note?`<p>${esc(r.note)}</p>`:''}<div class="queue-actions">${r.kind==='pdf'?`<button data-download="${r.id}">Download PDF ↓</button>`:''}<button data-remove="${r.id}">Remove</button></div></li>`).join('');$$('[data-remove]').forEach(b=>b.addEventListener('click',async()=>{try{await transaction('readwrite',s=>s.delete(b.dataset.remove));await refresh();status('Source removed from this browser.');}catch{status('Could not remove the source. Try again.');}}));$$('[data-download]').forEach(b=>b.addEventListener('click',()=>{const r=rows.find(x=>x.id===b.dataset.download);download(r.blob,r.name);}));};
- buttons.forEach(b=>b.disabled=false);await refresh();
- $('#source-form').addEventListener('submit',async ev=>{ev.preventDefault();const input=$('#source-url');let url;try{url=new URL(input.value.trim());if(!['http:','https:'].includes(url.protocol))throw Error('invalid');}catch{status('Enter a complete http or https URL.');input.focus();return;}
-  try{const rows=await all();if(rows.some(r=>r.url===url.href)){status('That link is already in your inbox.');return;}await transaction('readwrite',s=>s.put({id:crypto.randomUUID(),kind:'url',url:url.href,note:$('#source-note').value.trim(),created:Date.now()}));input.value='';$('#source-note').value='';await refresh();status('Link saved in this browser. Export it when you are ready to ask Codex.');}catch{status('Could not save the link. Browser storage may be full.');}
- });
- $('#source-file').addEventListener('change',async ev=>{let count=0;const errors=[];for(const file of ev.target.files){if(file.size>20*1048576){errors.push(file.name+': exceeds 20 MB');continue;}const header=await file.slice(0,5).text();if(header!=='%PDF-'){errors.push(file.name+': not a valid PDF');continue;}try{await transaction('readwrite',s=>s.put({id:crypto.randomUUID(),kind:'pdf',name:file.name,size:file.size,blob:file,note:$('#source-note').value.trim(),created:Date.now()}));count++;}catch{errors.push(file.name+': storage full or unavailable');}}await refresh();ev.target.value='';status(`${count} PDF${count===1?'':'s'} saved in this browser.${errors.length?' '+errors.join('; '):' Download or attach them to Codex when you are ready.'}`);});
- $('#export-inbox').addEventListener('click',async()=>{const rows=await all();const sources=rows.map(({blob,...meta})=>meta);download(new Blob([JSON.stringify({purpose:'Sources for researchx',note:'PDF entries contain metadata only. Attach their files separately or place them in pm/researchx/inbox/.',sources},null,2)],{type:'application/json'}),'researchx-inbox.json');status('Exported links, notes, and PDF filenames. Download or attach PDF files separately.');});
- $('#copy-prompt').addEventListener('click',async()=>{const prompt='Process the attached sources or pm/researchx/inbox/ for researchx. Spawn a research subagent for each source. Verify the originals, create plain-language takeaways and a meaningful interactive explanation, include short exact quotes and credited original figures when available, and publish the checked site to GitHub Pages. Follow pm/researchx/AGENTS.md.';try{await navigator.clipboard.writeText(prompt);$('#copy-status').textContent='Prompt copied. Attach your exported links and PDF files in Codex.';}catch{const t=document.createElement('textarea');t.value=prompt;t.setAttribute('aria-label','Reading prompt to copy');$('#copy-status').replaceChildren(t);t.select();}});
-}
-function download(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
+function requestPaint(){if(!frame)frame=requestAnimationFrame(paint);}
+reader.addEventListener('scroll',requestPaint,{passive:true});
+reader.addEventListener('wheel',()=>{navigationTarget=null;audibleUntil=performance.now()+1200;},{passive:true});
+reader.addEventListener('touchstart',()=>{navigationTarget=null;audibleUntil=performance.now()+1800;},{passive:true});
+reader.addEventListener('touchmove',()=>{audibleUntil=performance.now()+1800;},{passive:true});
+reader.addEventListener('touchend',()=>{audibleUntil=performance.now()+1800;},{passive:true});
+document.addEventListener('pointerdown',event=>{keyboardMode=false;navigationTarget=null;if(event.target.closest('a,button,input'))audibleUntil=0;else audibleUntil=performance.now()+1800;},{capture:true});
+reader.addEventListener('scrollend',()=>{navigationTarget=null;});
+function centreEntry(entry,animate=true){if(!entry)return;const r=entry.getBoundingClientRect(),bounds=reader.getBoundingClientRect();reader.scrollTo({top:reader.scrollTop+r.top-bounds.top+r.height/2-bounds.height/2,behavior:animate&&!reduced.matches?'smooth':'instant'});}
+document.addEventListener('keydown',event=>{
+ keyboardMode=true;
+ if(event.metaKey||event.ctrlKey||event.altKey)return;
+ if(event.key==='Escape'&&!panel.hidden){event.preventDefault();closeSearch();return;}
+ if(event.target.matches('input'))return;
+ if(event.key==='/'){event.preventDefault();openSearch();return;}
+ if(!panel.hidden||!visible.length)return;
+ if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key)){
+  if(event.key===' '&&event.target.closest('button,a'))return;
+  event.preventDefault();audibleUntil=performance.now()+1400;
+  const current=navigationTarget??Math.max(0,visible.indexOf(active));let index=current;
+  if(event.key==='Home')index=0;else if(event.key==='End')index=visible.length-1;else index=current+((['ArrowDown','PageDown'].includes(event.key)||(event.key===' '&&!event.shiftKey))?1:-1);
+  navigationTarget=Math.max(0,Math.min(visible.length-1,index));centreEntry(visible[navigationTarget]);
+ }else audibleUntil=0;
+});
+reader.addEventListener('focusin',event=>{const entry=event.target.closest('.reading-entry');if(keyboardMode&&entry){audibleUntil=0;centreEntry(entry);}});
+function openSearch(){audibleUntil=0;navigationTarget=null;panel.hidden=false;$('#search-toggle').setAttribute('aria-expanded','true');input.focus();}
+function closeSearch(restoreFocus=true){panel.hidden=true;$('#search-toggle').setAttribute('aria-expanded','false');if(restoreFocus)$('#search-toggle').focus();}
+$('#search-toggle').addEventListener('click',()=>panel.hidden?openSearch():closeSearch());
+$('.close-search').addEventListener('click',event=>{event.preventDefault();closeSearch();});
+$('#search-form').addEventListener('submit',event=>{event.preventDefault();closeSearch();visible[0]?.querySelector('a').focus();});
+document.addEventListener('pointerdown',event=>{if(!panel.hidden&&!event.target.closest('#search-panel,#search-toggle'))closeSearch(false);},{capture:true});
+function filter(){audibleUntil=0;active=null;entries.forEach(entry=>{entry.hidden=!matchesSearch(entry.dataset.search,input.value);});visible=entries.filter(entry=>!entry.hidden);reader.scrollTo({top:0,behavior:'instant'});$('#empty-result').hidden=visible.length>0;$('#search-status').textContent=visible.length?`${visible.length} matching ${visible.length===1?'source':'sources'}`:'No matching articles';$('#search-toggle').classList.toggle('has-query',Boolean(input.value));requestPaint();}
+input.addEventListener('input',filter);$('#clear-search').addEventListener('click',()=>{input.value='';filter();});
+addEventListener('resize',()=>{audibleUntil=0;requestPaint();});reduced.addEventListener('change',()=>{audibleUntil=0;requestPaint();});
+document.addEventListener('visibilitychange',()=>{audibleUntil=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;}else requestPaint();});
+addEventListener('pagehide',()=>{cancelAnimationFrame(frame);frame=0;});addEventListener('pageshow',requestPaint);requestPaint();

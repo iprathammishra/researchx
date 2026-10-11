@@ -23,9 +23,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-      - name: Verify learning models
+      - name: Verify motion, search, and audio state
         run: npm test
-      - name: Build explanations
+      - name: Build reading collection
         run: npm run build
       - name: Check content and links
         run: npm run check

@@ -1,0 +1,113 @@
+{
+  "id": "normalization",
+  "title": "When unsafe AI becomes normal",
+  "originalTitle": "The Normalization of Deviance in AI",
+  "deck": "Small shortcuts can become standard practice when repeated success hides the risk.",
+  "authors": "wunderwuzzi · Embrace The Red",
+  "published": "2025-12-04",
+  "type": "Essay",
+  "topic": "AI safety",
+  "minutes": 4,
+  "source": "https://embracethered.com/blog/posts/2025/the-normalization-of-deviance-in-ai/",
+  "sourceLabel": "Embrace The Red",
+  "takeaways": [
+    "A successful run does not establish that an AI workflow is secure.",
+    "Treat model output as untrusted input before it reaches consequential actions.",
+    "Retain oversight and enforce permissions outside the model."
+  ],
+  "sections": [
+    {
+      "heading": "Trust needs a boundary",
+      "paragraphs": [
+        "The author argues that probabilistic model responses need downstream access checks, encoding and sanitization. Model cooperation cannot replace these controls."
+      ]
+    },
+    {
+      "heading": "Success can conceal drift",
+      "paragraphs": [
+        "Temporary shortcuts become routine when nothing visibly breaks. Competitive pressure makes teams more likely to forget why safeguards existed."
+      ]
+    },
+    {
+      "heading": "Two routes to harm",
+      "paragraphs": [
+        "Overconfidence can amplify ordinary model mistakes. Attackers can exploit the same permissive workflow through malicious inputs or compromised models."
+      ]
+    },
+    {
+      "heading": "Make safeguards concrete",
+      "paragraphs": [
+        "The essay recommends human leadership in sensitive workflows, alongside sandboxing, limited permissions and short-lived credentials."
+      ]
+    }
+  ],
+  "quote": {
+    "text": "The absence of disaster was mistaken for the presence of safety.",
+    "locator": "Opening discussion of Challenger, paragraph beginning “Despite data showing…”"
+  },
+  "figure": {
+    "path": "assets/sources/normalization.png",
+    "caption": "Original article illustration. Credit: Embrace The Red / wunderwuzzi.",
+    "sourceUrl": "https://embracethered.com/blog/images/2025/normalization-of-deviance-in-ai.png",
+    "alt": "A cracked monitor displays “Normalization of Deviance in AI”."
+  },
+  "caveats": [
+    {
+      "heading": "Argument, not measurement",
+      "text": "This is a security practitioner’s essay, not a controlled study."
+    },
+    {
+      "heading": "A dated snapshot",
+      "text": "Vendor examples describe the author’s December 2025 observations."
+    }
+  ],
+  "references": [
+    {
+      "label": "Read the original essay",
+      "url": "https://embracethered.com/blog/posts/2025/the-normalization-of-deviance-in-ai/",
+      "locator": "Full article; published 4 December 2025"
+    },
+    {
+      "label": "Original illustration",
+      "url": "https://embracethered.com/blog/images/2025/normalization-of-deviance-in-ai.png",
+      "locator": "Inline image after the opening Challenger discussion"
+    }
+  ],
+  "interaction": {
+    "type": "drift",
+    "title": "Watch the baseline drift",
+    "label": "An illustrative example · authored by researchx",
+    "description": "Move through four fictional deployments of an assistant that can delete files. Each uneventful run tempts the team to remove a control. Compare the current safeguards with the original baseline. This conceptual illustration contains no measured failure rates.",
+    "steps": [
+      {
+        "label": "Initial rollout",
+        "safeguards": [
+          "Read-only access",
+          "Human approval",
+          "Isolated workspace"
+        ],
+        "change": "The assistant can suggest a deletion; a person executes it."
+      },
+      {
+        "label": "One successful pilot",
+        "safeguards": [
+          "Human approval",
+          "Isolated workspace"
+        ],
+        "change": "The assistant receives write access after one quiet pilot."
+      },
+      {
+        "label": "A busy release",
+        "safeguards": [
+          "Isolated workspace"
+        ],
+        "change": "Approval is skipped to save time."
+      },
+      {
+        "label": "Shortcut becomes policy",
+        "safeguards": [],
+        "change": "The assistant is moved into the live workspace with unrestricted deletion."
+      }
+    ]
+  }
+}

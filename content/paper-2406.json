@@ -1,0 +1,172 @@
+{
+  "id": "paper-2406",
+  "title": "AgentDojo: test the agent, not just the answer",
+  "originalTitle": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+  "deck": "A laboratory for separating useful work from an attacker's unwanted actions.",
+  "authors": "Edoardo Debenedetti, Jie Zhang, Mislav Balunović, Luca Beurer-Kellner, Marc Fischer, Florian Tramèr",
+  "published": "2024-06-19",
+  "type": "Paper",
+  "topic": "Agent security",
+  "minutes": 5,
+  "source": "https://arxiv.org/pdf/2406.13352",
+  "sourceLabel": "arXiv · NeurIPS 2024",
+  "takeaways": [
+    "Check both task completion and unwanted actions.",
+    "Low attack success can coexist with low usefulness.",
+    "Restricting available tools helped in this benchmark.",
+    "These historical measurements are not deployment guarantees."
+  ],
+  "sections": [
+    {
+      "heading": "What the paper tests",
+      "paragraphs": [
+        "AgentDojo contains 97 user tasks and 629 security cases across workspace, messaging, banking, and travel environments. Agents use tools against changing application state. An attacker can replace selected tool-returned content. Deterministic checks assess the user's goal and the attacker's goal separately. The framework permits new tasks, attacks, and defenses."
+      ]
+    },
+    {
+      "heading": "A miniature example: the corrupted receipt",
+      "paragraphs": [
+        "The following walkthrough is an original teaching example, not an experiment reported in the paper. Imagine asking an assistant to read a dinner receipt and add its total to your expense note. The receipt contains ordinary information: a restaurant name, a date, and an amount. But someone has added a paragraph asking the assistant to send your expense history to a stranger.",
+        "Walk through three checkpoints. First, what did you actually ask for? An update to one note. Second, where did the extra request come from? A document being read. Third, which action would make the extra request consequential? Sending information outside your account. Drawing those checkpoints as separate boxes makes the hidden change in authority visible: something encountered during the task tries to become a new task."
+      ]
+    },
+    {
+      "heading": "Keep two scorecards",
+      "paragraphs": [
+        "Continue the invented receipt example. If the assistant updates the note and sends nothing, both of your checks pass. If it sends your history and never updates the note, both fail. A more confusing outcome is that it updates the note correctly and also sends your history. Reading only the final expense note would miss the unwanted action.",
+        "There is another outcome: the assistant refuses to do anything. That prevents the invented leak, but leaves you doing the expense entry yourself. A useful inspection therefore asks about completed work as well as prevented harm. In your own demonstration, show the note and the outgoing-message log side by side. This makes the distinction concrete without inventing a probability that a real model will choose any particular outcome."
+      ]
+    },
+    {
+      "heading": "Try changing the available actions",
+      "paragraphs": [
+        "For this teaching example, give the assistant only two capabilities: read the receipt and edit the expense note. The invented instruction to send a message now has no corresponding action available. This is a diagram of capability, not a claim that every prompt injection is solved.",
+        "Change the task: now you ask the assistant to email the note to your accountant. Sending becomes necessary, and the simple restriction no longer resolves the problem. You would need to reason about the allowed recipient and the allowed information. The exercise is to write down the precise action your workflow needs, then mark the same action if it could also serve an unwanted purpose. The picture should change when the legitimate task changes."
+      ]
+    },
+    {
+      "heading": "Read the measured tradeoff",
+      "paragraphs": [
+        "In Table 5, GPT-4o's tool-filter defense has 6.84% targeted attack success, versus 57.69% without defense. The detector has 41.49% benign utility. These are benchmark results, not universal rates.",
+        "Use the comparison below as a reading exercise. Select a defense and inspect all three bars before deciding what looks preferable. A lower attack bar alone does not tell you how much useful work remains. Ask what kinds of task you care about and what consequence you could tolerate. That judgment belongs to your application; the chart supplies evidence from one evaluation rather than deciding it for you."
+      ]
+    }
+  ],
+  "quote": {
+    "text": "a static benchmark would be of limited use.",
+    "locator": "Introduction, PDF page 2; arXiv v3"
+  },
+  "figure": {
+    "path": "assets/sources/agentdojo-figure-1.png",
+    "caption": "Figure 1, PDF p.2. Debenedetti et al., AgentDojo, arXiv v3. Cropped from the original; figure content unchanged.",
+    "sourceUrl": "https://arxiv.org/pdf/2406.13352v3#page=2",
+    "alt": "Original AgentDojo diagram: an attacker inserts content into an environment; the agent follows a user task through tools, while utility and security are evaluated separately."
+  },
+  "caveats": [
+    {
+      "heading": "Version and internal discrepancies",
+      "text": "Uses v3, revised 24 November 2024. Some introductory percentages disagree with its detailed tables; this page uses Table 5."
+    },
+    {
+      "heading": "Evaluation boundaries",
+      "text": "Controlled environments, selected attacks, and 2024 models; these figures do not establish present-day product security."
+    },
+    {
+      "heading": "Teaching examples",
+      "text": "The receipt walkthrough is illustrative. It contains no measured model behavior or inferred attack probability."
+    }
+  ],
+  "references": [
+    {
+      "label": "Study design",
+      "url": "https://arxiv.org/pdf/2406.13352v3#page=3",
+      "locator": "Sections 3.1–3.4, PDF pages 3–6"
+    },
+    {
+      "label": "Defense results",
+      "url": "https://arxiv.org/pdf/2406.13352v3#page=20",
+      "locator": "Appendix C, Table 5, PDF page 20; 95% confidence intervals"
+    },
+    {
+      "label": "Defense limitations",
+      "url": "https://arxiv.org/pdf/2406.13352v3#page=9",
+      "locator": "Section 4.3, PDF page 9"
+    },
+    {
+      "label": "Version record",
+      "url": "https://arxiv.org/abs/2406.13352",
+      "locator": "First submitted 19 June 2024; v3 revised 24 November 2024"
+    }
+  ],
+  "interaction": {
+    "kind": "defense-comparison",
+    "title": "Choose a defense. Inspect the tradeoff.",
+    "description": "A selector updates three horizontal percentage bars for a GPT-4o defense. Higher utility is better; lower attack success is better. Display the reported uncertainty beside each bar.",
+    "evidenceLabel": "Measured · Table 5 · arXiv v3 · PDF page 20",
+    "boundary": "Historical measurements under the paper's evaluation conditions. Values are fixed reported observations; the controls do not simulate new attacks, interpolate results, or predict a deployment. Do not substitute the different baseline attack rate from Table 3.",
+    "metricLabels": {
+      "benignUtility": "Tasks completed without attack",
+      "utilityUnderAttack": "User goal achieved safely under attack",
+      "targetedASR": "Attacker goal achieved"
+    },
+    "unit": "%",
+    "uncertainty": "Reported 95% confidence intervals, expressed as ± percentage points",
+    "data": [
+      {
+        "label": "No defense",
+        "benignUtility": 69.0,
+        "utilityUnderAttack": 50.01,
+        "targetedASR": 57.69,
+        "ci95": {
+          "benignUtility": 3.6,
+          "utilityUnderAttack": 3.9,
+          "targetedASR": 3.9
+        }
+      },
+      {
+        "label": "Data delimiters",
+        "benignUtility": 72.66,
+        "utilityUnderAttack": 55.64,
+        "targetedASR": 41.65,
+        "ci95": {
+          "benignUtility": 3.5,
+          "utilityUnderAttack": 3.9,
+          "targetedASR": 3.9
+        }
+      },
+      {
+        "label": "Injection detector",
+        "benignUtility": 41.49,
+        "utilityUnderAttack": 21.14,
+        "targetedASR": 7.95,
+        "ci95": {
+          "benignUtility": 3.9,
+          "utilityUnderAttack": 3.2,
+          "targetedASR": 2.1
+        }
+      },
+      {
+        "label": "Repeat user prompt",
+        "benignUtility": 85.53,
+        "utilityUnderAttack": 67.25,
+        "targetedASR": 27.82,
+        "ci95": {
+          "benignUtility": 2.8,
+          "utilityUnderAttack": 3.7,
+          "targetedASR": 3.5
+        }
+      },
+      {
+        "label": "Tool filter",
+        "benignUtility": 73.13,
+        "utilityUnderAttack": 56.28,
+        "targetedASR": 6.84,
+        "ci95": {
+          "benignUtility": 3.5,
+          "utilityUnderAttack": 3.9,
+          "targetedASR": 2.0
+        }
+      }
+    ]
+  }
+}

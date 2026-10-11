@@ -1,0 +1,40 @@
+name: Publish researchx
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+      - name: Use Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Verify learning models
+        run: npm test
+      - name: Build explanations
+        run: npm run build
+      - name: Check content and links
+        run: npm run check
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v4

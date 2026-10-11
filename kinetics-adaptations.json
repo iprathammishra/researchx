@@ -1,0 +1,24 @@
+[
+  {
+    "effect_id": "momentum-picker",
+    "upstream_commit": "017498f8ae0e728ce7461852070d22601dd0a46e",
+    "project": "researchx",
+    "framework": "Vanilla JavaScript and CSS",
+    "implementation_paths": ["app.js", "style.css", "scripts/motion.mjs"],
+    "status": "implemented",
+    "checks": ["Scalar spring interruption and settling model tests pass", "Circular indexing and momentum projection tests pass", "All static content and local links pass validation"],
+    "limitations": ["Final gesture and narrow-layout browser pass pending"],
+    "notes": "Independent behavioral adaptation of the recipe, using a physical spring rather than the upstream CSS approximation and wheel lock. Pointer tracking, velocity handoff and reduced-motion handling follow Apple Design. Upstream records remain extracted."
+  },
+  {
+    "effect_id": "bookmark-toggle",
+    "upstream_commit": "017498f8ae0e728ce7461852070d22601dd0a46e",
+    "project": "researchx",
+    "framework": "Vanilla JavaScript and CSS",
+    "implementation_paths": ["app.js", "style.css"],
+    "status": "implemented",
+    "checks": ["Real saved state drives aria-pressed and ribbon fill", "Reduced-motion CSS disables the decorative drop"],
+    "limitations": ["Final save/reversal browser pass pending"],
+    "notes": "Original ribbon geometry and implementation. Adapted behavioral concept; smaller displacement for an editorial reading room."
+  }
+]

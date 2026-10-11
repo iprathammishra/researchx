@@ -1,0 +1,102 @@
+{
+  "id": "paper-2503",
+  "title": "Make permissions the safety layer",
+  "originalTitle": "Defeating Prompt Injections by Design",
+  "deck": "CaMeL turns agent safety into checks that run before actions.",
+  "authors": "Edoardo Debenedetti, Ilia Shumailov, Tianqi Fan, Jamie Hayes, Nicholas Carlini, Daniel Fabian, Christoph Kern, Chongyang Shi, Andreas Terzis, and Florian Tramèr",
+  "published": "2025-03-24",
+  "type": "Paper",
+  "topic": "Agent security",
+  "minutes": 3,
+  "source": "https://arxiv.org/pdf/2503.18813v2",
+  "sourceLabel": "arXiv · v2, 24 June 2025",
+  "takeaways": [
+    "Keep planning separate from untrusted text.",
+    "Track where values originate and who may receive them.",
+    "Benchmark resilience depends on the surrounding policy system."
+  ],
+  "sections": [
+    {
+      "heading": "Separate planning from reading",
+      "paragraphs": [
+        "One model plans from a trusted request. A second, tool-free model reads untrusted material. A Python interpreter executes the plan."
+      ]
+    },
+    {
+      "heading": "Guard the route, too",
+      "paragraphs": [
+        "Capabilities track each value's origins and permitted readers. Policies can block tool calls even when malicious data supplies a plausible recipient."
+      ]
+    },
+    {
+      "heading": "Read the result precisely",
+      "paragraphs": [
+        "With o3 high, CaMeL completed 77.3% of AgentDojo tasks versus 84.5% natively. These measure task success without attacks, not universal security probabilities."
+      ]
+    },
+    {
+      "heading": "Keep the guarantee bounded",
+      "paragraphs": [
+        "Misleading summaries and phishing remain outside scope. Side channels, policy maintenance, and approval fatigue matter. Formal verification of the interpreter remains future work."
+      ]
+    }
+  ],
+  "quote": {
+    "text": "No, prompt injection attacks are not fully solved.",
+    "locator": "Section 9.3, page 24"
+  },
+  "figure": {
+    "path": "assets/sources/camel-figure-11.png",
+    "caption": "Figure 11, p.16. Claude 3.5 Sonnet; 949 attacks. Attack axis uses symlog. Debenedetti et al., CC BY 4.0; cropped.",
+    "sourceUrl": "https://arxiv.org/pdf/2503.18813v2#page=16",
+    "alt": "Original charts comparing task completion and successful attacks across defenses."
+  },
+  "caveats": [
+    {
+      "heading": "Different experiments",
+      "text": "The chart uses Claude; the headline result uses o3."
+    },
+    {
+      "heading": "Research implementation",
+      "text": "Released code is experimental and may contain security bugs."
+    }
+  ],
+  "references": [
+    {
+      "label": "Architecture and trust boundary",
+      "url": "https://arxiv.org/pdf/2503.18813v2#page=7",
+      "locator": "Sections 5.1–5.4, pages 7–11"
+    },
+    {
+      "label": "Task success numbers",
+      "url": "https://arxiv.org/pdf/2503.18813v2#page=33",
+      "locator": "Table 2, page 33; o3 High rows"
+    },
+    {
+      "label": "Original comparison figure",
+      "url": "https://arxiv.org/pdf/2503.18813v2#page=16",
+      "locator": "Figure 11, page 16; Section 6.3"
+    },
+    {
+      "label": "Non-goals and limitations",
+      "url": "https://arxiv.org/pdf/2503.18813v2#page=24",
+      "locator": "Sections 3.1, 7, 9.3, and 10"
+    },
+    {
+      "label": "Authors' implementation",
+      "url": "https://github.com/google-research/camel-prompt-injection",
+      "locator": "README research-artifact warning"
+    },
+    {
+      "label": "Figure license",
+      "url": "https://creativecommons.org/licenses/by/4.0/",
+      "locator": "CC BY 4.0, linked by the arXiv record"
+    }
+  ],
+  "interaction": {
+    "kind": "camel",
+    "title": "Follow the permission",
+    "description": "Use a fictional file with allowed readers Alice and Bob. Let the visitor select Bob or Mallory as its recipient and turn the permission gate on or off. Draw a route from file to recipient; show allowed when the selected recipient belongs to the allowed-reader set, otherwise blocked when the gate is on. Show uncontrolled when the gate is off.",
+    "boundary": "This is an original teaching model, not executable CaMeL, a threat detector, or a reproduction of its benchmark. It illustrates one explicit allow-list rule. It does not simulate model behavior, user-approved sharing, implicit dependencies, or side channels."
+  }
+}

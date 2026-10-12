@@ -25,6 +25,10 @@ jobs:
           node-version: 22
       - name: Verify motion, search, and audio state
         run: npm test
+      - name: Check finance scripts
+        run: |
+          node --check finx/app.js
+          node --check finx/planner.js
       - name: Build reading collection
         run: npm run build
       - name: Check content and links

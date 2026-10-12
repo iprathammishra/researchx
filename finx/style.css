@@ -1,0 +1,35 @@
+html{color-scheme:light}body{max-width:1320px;margin:0 auto;padding:26px 24px 60px;background:white;color:#222;font:15px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif}h1{font-size:32px;line-height:1.2;font-weight:600;margin:20px 0}h2{font-size:23px;font-weight:600;margin-top:32px}h3{font-size:18px;margin:0 0 10px}p{margin:10px 0}.eyebrow,.meta,small,figcaption{font-size:12px;color:#666}.lede{font-size:16px}header{margin-bottom:24px}.link-list{padding-left:24px}.link-list li{margin:8px 0}article,details,.panel{margin:22px 0}summary{cursor:pointer}label{display:block;margin:7px 0}button,input,select,textarea{font:inherit;padding:5px}button{cursor:pointer}textarea{width:100%;min-height:100px}input[type=number]{width:90px}.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;vertical-align:top;padding:10px;border-bottom:1px solid #ddd;min-width:100px}progress{width:100%}figure{margin:22px 0;max-width:680px}img,svg{max-width:100%;height:auto}figcaption{margin-top:6px}.listen{font-size:12px}.badge{font-size:12px;color:#666}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}footer{font-size:12px;margin-top:40px}@media(max-width:650px){body{padding:18px 16px}h1{font-size:28px}input,select{max-width:100%}}@media print{.controls,.listen,button{display:none}}
+
+.guide-list{padding-left:22px}.guide-list li{margin:12px 0}.guide-description{margin:2px 0;font-size:13px;color:#555}header p{max-width:900px}
+/* The requested compact desktop scale; phones keep their normal readable size. */
+@media(min-width:900px){body{zoom:.7;max-width:1600px}}
+
+/* A horizontal reading index, with plain links and no cards. */
+.home header{display:flex;align-items:center;gap:90px;border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:30px}
+.home h1{flex:none}.home h1 .meta{font-weight:400;margin-left:10px}
+.home-intro p{margin:5px 0}
+.home-index{display:grid;gap:35px}
+.home-index h2{margin-top:0;font-size:21px}
+.home-index h3{font-size:16px;font-weight:500;margin:0}
+.path-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:42px;margin-top:24px}
+.home-index ul{padding-left:22px}
+.path-step li{margin:9px 0}
+.path-step>p{margin-left:22px}
+.ideas-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 42px;margin-top:24px}
+.ideas-list li{margin:0}
+.ideas-list p{margin:3px 0}
+.home footer{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;border-top:1px solid #ddd;padding-top:14px;margin-top:35px}
+@media(max-width:800px){.home header{gap:30px}.path-grid,.ideas-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}}
+@media(max-width:520px){.home header{display:block}.path-grid,.ideas-list{grid-template-columns:1fr}.home footer{display:block}}
+
+.wide-photo{max-width:1000px}.question{max-width:1000px;padding-bottom:12px;border-bottom:1px solid #ddd}pre{overflow:auto;background:#fafafa;padding:16px}details summary{font-weight:500}details p{max-width:1150px}
+
+.brand{display:inline-flex;align-items:center;gap:9px;color:inherit;text-decoration:none}.brand img{flex:none}.eyebrow .brand{font-size:15px;color:#222}.editorial-sketch{max-width:760px;margin:28px 0}.editorial-sketch figcaption{max-width:680px}
+
+/* Dense diagrams keep readable labels; only the drawing scrolls on phones. */
+.diagram-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding:4px 0 10px}
+.diagram-scroll img{display:block;width:760px;max-width:none;height:auto}
+.diagram-scroll:focus-visible{outline:1px solid #666;outline-offset:3px}
+.diagram-hint{display:none}
+@media(max-width:800px){.diagram-scroll img{width:620px}.diagram-hint{display:inline}}
+@media print{.diagram-scroll{overflow:visible}.diagram-scroll img{width:100%;max-width:100%}.diagram-hint{display:none}}

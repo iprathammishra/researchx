@@ -1,0 +1,10 @@
+"use strict";
+const planner=document.querySelector('#exam-window');
+if(planner){
+const start=document.querySelector('#plan-start'),exam=document.querySelector('#plan-exam'),hours=document.querySelector('#plan-hours'),summary=document.querySelector('#plan-summary'),stages=document.querySelector('#plan-stages');
+const localDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+start.value=localDate(new Date());exam.value='2027-08-01';
+try{const saved=JSON.parse(localStorage.getItem('finx-plan'));if(saved&&['02','05','08','11'].includes(saved.window)&&/^\d{4}-\d{2}-\d{2}$/.test(saved.start)&&/^2027-\d{2}-\d{2}$/.test(saved.exam)&&saved.hours>=100&&saved.hours<=1000){planner.value=saved.window;start.value=saved.start;exam.value=saved.exam;hours.value=saved.hours}}catch{}
+function update(){stages.replaceChildren();const a=new Date(start.value+'T12:00:00'),b=new Date(exam.value+'T12:00:00'),days=Math.floor((b-a)/86400000),budget=Number(hours.value);if(!Number.isFinite(days)||days<=0||!exam.value.startsWith('2027-')||budget<100||budget>1000){summary.textContent='Enter a start before a 2027 exam date and a study budget from 100 to 1,000 hours.';return}const weeks=days/7,weekly=budget/weeks;summary.textContent=`${weeks.toFixed(1)} weeks · about ${weekly.toFixed(1)} hours/week for ${budget} hours.${weekly>15?' This is an intensive schedule alongside a full-time job. Consider a later window.':''}${days<42?' Less than six weeks remain; this is a revision runway, not a full preparation plan.':''}`;for(const [label,share] of [['First pass',.55],['Practice and repair',.25],['Mocks and revision',.20]]){const li=document.createElement('li');li.textContent=`${label}: about ${(weeks*share).toFixed(1)} weeks (${Math.round(budget*share)} hours).`;stages.append(li)}try{localStorage.setItem('finx-plan',JSON.stringify({window:planner.value,start:start.value,exam:exam.value,hours:budget}))}catch{}}
+planner.addEventListener('change',()=>{exam.value=`2027-${planner.value}-01`;update()});for(const input of [start,exam,hours])input.addEventListener('input',update);update();
+}

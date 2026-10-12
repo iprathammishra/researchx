@@ -10,8 +10,12 @@ Every item opens its original directly. Metadata and short descriptions were che
 | The lethal trifecta for AI agents: private data, untrusted content, and external communication | [Simon Willison](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) |
 | Beginners' Guide to Financial Statement | [SEC](https://www.sec.gov/about/reports-publications/investorpubsbegfinstmtguide) |
 | Cash conversion cycle: An essential tool to boost your cash flow | [BDC](https://www.bdc.ca/en/articles-tools/money-finance/manage-finances/how-boost-cash-flow) |
+| Reasoning together | [Aeon · Emilie Prattico](https://aeon.co/essays/habermass-theory-of-truth-meant-he-changed-his-mind) |
+| A life in episodes | [Aeon · Thomas Söderqvist](https://aeon.co/essays/what-i-have-learned-from-posting-episodes-of-my-life-on-facebook) |
 
 The BDC article has no named byline; its institutional attribution is BDC (Business Development Bank of Canada). Its canonical URL and publication date (2020-09-12) were verified from the primary page’s metadata.
+
+The Aeon essays use their complete on-page titles, which differ from their longer search/browser titles. Their authors, publication dates (2026-09-25 and 2026-10-05), and canonical URLs were verified against the primary pages; tracking parameters are omitted.
 
 Initial scrolling inspiration: [Transition Dial](https://animation-gallery-xi.vercel.app/). The source snippets and recordings of that site are not bundled.
 
